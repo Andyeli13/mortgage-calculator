@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'modify_screen.dart';
-import 'mortgage.dart';
+import 'mortgage_provider.dart';
 
-/// Screen 1: shows the mortgage data and results.
-class SummaryScreen extends StatefulWidget {
+/// Screen 1 (left in the design): shows the mortgage data and results.
+/// It has no state of its own. It watches the provider and rebuilds
+/// whenever the data changes.
+class SummaryScreen extends StatelessWidget {
   const SummaryScreen({super.key});
-
-  @override
-  State<SummaryScreen> createState() => _SummaryScreenState();
-}
-
-class _SummaryScreenState extends State<SummaryScreen> {
-  Mortgage _mortgage = Mortgage();
-  bool _termsAccepted = false;
 
   Widget _row(String label, String value) {
     return Padding(
@@ -33,21 +28,8 @@ class _SummaryScreenState extends State<SummaryScreen> {
     );
   }
 
-  /// Opens the modify screen, passing a copy of the data, and waits for the updated Mortgage to come back when the user presses DONE.
-  Future<void> _openModifyScreen() async {
-    final result = await Navigator.push<Mortgage>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ModifyScreen(mortgage: Mortgage.copy(_mortgage)),
-      ),
-    );
-    if (result != null) {
-      setState(() => _mortgage = result);
-    }
-  }
-
   /// Alert dialog that confirms the terms and conditions.
-  Future<void> _showTermsDialog() async {
+  Future<void> _showTermsDialog(BuildContext context) async {
     final agreed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -70,11 +52,17 @@ class _SummaryScreenState extends State<SummaryScreen> {
         ],
       ),
     );
-    setState(() => _termsAccepted = agreed ?? false);
+    if (context.mounted) {
+      context.read<MortgageProvider>().setTermsAccepted(agreed ?? false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // watch() makes this screen rebuild whenever the provider changes
+    final provider = context.watch<MortgageProvider>();
+    final mortgage = provider.mortgage;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mortgage Calculator'),
@@ -86,24 +74,24 @@ class _SummaryScreenState extends State<SummaryScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _row('Amount', _mortgage.getFormattedAmount()),
-            _row('Years', '${_mortgage.getYears()}'),
-            _row('Interest Rate', _mortgage.getFormattedRate()),
+            _row('Amount', mortgage.getFormattedAmount()),
+            _row('Years', '${mortgage.getYears()}'),
+            _row('Interest Rate', mortgage.getFormattedRate()),
             const Divider(color: Colors.red, thickness: 3),
-            _row('Monthly Payment', _mortgage.formattedMonthlyPayment()),
-            _row('Total Payment', _mortgage.formattedTotalPayment()),
+            _row('Monthly Payment', mortgage.formattedMonthlyPayment()),
+            _row('Total Payment', mortgage.formattedTotalPayment()),
 
-            // Temrs and Conditions box placed right after Total Payment
+            // Check box placed right after Total Payment
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
               title: const Text('Terms and Conditions'),
-              value: _termsAccepted,
+              value: provider.termsAccepted,
               onChanged: (checked) {
                 if (checked == true) {
-                  _showTermsDialog();
+                  _showTermsDialog(context);
                 } else {
-                  setState(() => _termsAccepted = false);
+                  context.read<MortgageProvider>().setTermsAccepted(false);
                 }
               },
             ),
@@ -111,7 +99,12 @@ class _SummaryScreenState extends State<SummaryScreen> {
             const SizedBox(height: 24),
             Center(
               child: ElevatedButton(
-                onPressed: _openModifyScreen,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ModifyScreen()),
+                  );
+                },
                 child: const Text('MODIFY DATA'),
               ),
             ),

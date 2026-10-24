@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'mortgage.dart';
+import 'mortgage_provider.dart';
 
-/// Screen 2: lets the user change years, amount and interest rate, then returns the updated Mortgage to the first screen.
+/// Screen 2 (right in the design): the input screen. It starts with the
+/// values currently held (and saved) by the provider. Pressing DONE sends
+/// the new values to the provider, which updates screen 1 and saves them.
 class ModifyScreen extends StatefulWidget {
-  final Mortgage mortgage;
-
-  const ModifyScreen({super.key, required this.mortgage});
+  const ModifyScreen({super.key});
 
   @override
   State<ModifyScreen> createState() => _ModifyScreenState();
@@ -15,24 +16,25 @@ class ModifyScreen extends StatefulWidget {
 class _ModifyScreenState extends State<ModifyScreen> {
   static const double _itemHeight = 48;
 
-  // Interest rates from 2% to 15% in increments of 0.25
+  // Interest rates from 2% to 15% in steps of 0.25 (53 values)
   final List<double> _rates = List.generate(53, (i) => 2 + i * 0.25);
 
   late int _years;
-  late double _selectedRate; // in percent
+  late double _selectedRate; // in percent, e.g. 3.5
   late final TextEditingController _amountController;
   late final ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
-    final m = widget.mortgage;
+    // read() gets the provider once, without listening for changes
+    final m = context.read<MortgageProvider>().mortgage;
     _years = [10, 15, 30].contains(m.getYears()) ? m.getYears() : 30;
     _amountController = TextEditingController(
       text: m.getAmount().toStringAsFixed(2),
     );
 
-    // Find the list entry closest to the current rate
+    // Find the list entry closest to the saved rate
     final currentPct = m.getRate() * 100;
     int index = 0;
     double best = double.infinity;
@@ -64,10 +66,12 @@ class _ModifyScreenState extends State<ModifyScreen> {
       );
       return;
     }
-    widget.mortgage.setAmount(amount);
-    widget.mortgage.setYears(_years);
-    widget.mortgage.setRate(_selectedRate / 100);
-    Navigator.pop(context, widget.mortgage); // send data back
+    context.read<MortgageProvider>().updateMortgage(
+      amount: amount,
+      years: _years,
+      rate: _selectedRate / 100,
+    );
+    Navigator.pop(context);
   }
 
   Widget _yearOption(int value) {
