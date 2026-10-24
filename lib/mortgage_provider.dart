@@ -3,10 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'mortgage.dart';
 
-/// Holds the app's state. Both screens read from this one object, and any
-/// change calls notifyListeners() so every screen watching it rebuilds.
-/// The loan inputs are also saved with SharedPreferences so they survive a
-/// relaunch of the app.
+/// Holds the app's state. Any change calls notifyListeners(). Loan inputs are saved with SharedPreferences
 class MortgageProvider extends ChangeNotifier {
   static const String _amountKey = 'amount';
   static const String _yearsKey = 'years';
@@ -18,8 +15,7 @@ class MortgageProvider extends ChangeNotifier {
   Mortgage get mortgage => _mortgage;
   bool get termsAccepted => _termsAccepted;
 
-  /// Reads the saved values (if any) from SharedPreferences.
-  /// Called once at startup, before the first screen is shown.
+  /// Reads saved values from SharedPreferences.
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     final m = Mortgage();
@@ -30,12 +26,11 @@ class MortgageProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Called when the user presses DONE on the input screen.
   /// Updates the state, refreshes the screens, then saves to disk.
   Future<void> updateMortgage({
     required double amount,
     required int years,
-    required double rate, // decimal, e.g. 0.035
+    required double rate, // decimal
   }) async {
     final m = Mortgage();
     m.setAmount(amount);

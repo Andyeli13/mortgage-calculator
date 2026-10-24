@@ -4,9 +4,7 @@ import 'package:provider/provider.dart';
 import 'modify_screen.dart';
 import 'mortgage_provider.dart';
 
-/// Screen 1 (left in the design): shows the mortgage data and results.
-/// It has no state of its own. It watches the provider and rebuilds
-/// whenever the data changes.
+/// Screen 1 watches the provider and rebuilds whenever the data changes.
 class SummaryScreen extends StatelessWidget {
   const SummaryScreen({super.key});
 
@@ -59,7 +57,6 @@ class SummaryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // watch() makes this screen rebuild whenever the provider changes
     final provider = context.watch<MortgageProvider>();
     final mortgage = provider.mortgage;
 

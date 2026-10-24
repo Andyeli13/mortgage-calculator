@@ -1,10 +1,9 @@
 import 'dart:math';
 
-/// Model class: encapsulates a mortgage calculator
 class Mortgage {
   double _amount = 0;
   int _years = 0;
-  double _rate = 0; // stored as a decimal
+  double _rate = 0;
 
   Mortgage() {
     setAmount(0.0);
@@ -37,7 +36,7 @@ class Mortgage {
 
   String getFormattedAmount() => _money(_amount);
 
-  /// Interest rate as a percent string -> "3.25%".
+  /// Interest rate as a percent string
   String getFormattedRate() {
     String s = (_rate * 100).toStringAsFixed(2);
     if (s.contains('.')) {
@@ -50,8 +49,8 @@ class Mortgage {
   double monthlyPayment() {
     final months = _years * 12;
     if (months == 0) return 0;
-    final mRate = _rate / 12; // monthly interest rate
-    if (mRate == 0) return _amount / months; // avoid divide-by-zero
+    final mRate = _rate / 12;
+    if (mRate == 0) return _amount / months;
     final temp = pow(1 / (1 + mRate), months).toDouble();
     return _amount * mRate / (1 - temp);
   }

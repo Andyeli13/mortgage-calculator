@@ -3,9 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'mortgage_provider.dart';
 
-/// Screen 2 (right in the design): the input screen. It starts with the
-/// values currently held (and saved) by the provider. Pressing DONE sends
-/// the new values to the provider, which updates screen 1 and saves them.
+/// Screen 2: Pressing DONE sends the new values to the provider
 class ModifyScreen extends StatefulWidget {
   const ModifyScreen({super.key});
 
@@ -16,18 +14,17 @@ class ModifyScreen extends StatefulWidget {
 class _ModifyScreenState extends State<ModifyScreen> {
   static const double _itemHeight = 48;
 
-  // Interest rates from 2% to 15% in steps of 0.25 (53 values)
+  // Interest rates from 2% to 15% in increments of 0.25
   final List<double> _rates = List.generate(53, (i) => 2 + i * 0.25);
 
   late int _years;
-  late double _selectedRate; // in percent, e.g. 3.5
+  late double _selectedRate; // in percent
   late final TextEditingController _amountController;
   late final ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
-    // read() gets the provider once, without listening for changes
     final m = context.read<MortgageProvider>().mortgage;
     _years = [10, 15, 30].contains(m.getYears()) ? m.getYears() : 30;
     _amountController = TextEditingController(
@@ -134,7 +131,7 @@ class _ModifyScreenState extends State<ModifyScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Interest rate: ListView from 2% to 15% in 0.25 steps
+            // Interest rate: ListView from 2% to 15% in 0.25 increments
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

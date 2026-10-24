@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'mortgage_provider.dart';
 import 'summary_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load the saved loan data before the first screen appears, so the app
-  // shows the same values as the last launch.
+  // Load saved loan data before the first screen appears
   final provider = MortgageProvider();
   await provider.load();
 
   runApp(
-    ChangeNotifierProvider.value(
-      value: provider,
-      child: const MortgageApp(),
-    ),
+    ChangeNotifierProvider.value(value: provider, child: const MortgageApp()),
   );
 }
 
@@ -27,10 +24,7 @@ class MortgageApp extends StatelessWidget {
     return MaterialApp(
       title: 'Mortgage Calculator',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: Colors.indigo,
-        useMaterial3: true,
-      ),
+      theme: ThemeData(colorSchemeSeed: Colors.indigo, useMaterial3: true),
       home: const SummaryScreen(),
     );
   }
